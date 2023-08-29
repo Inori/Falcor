@@ -83,6 +83,7 @@ endif()
 if(FALCOR_WINDOWS)
     set(PACKMAN "${CMAKE_SOURCE_DIR}/tools/packman/packman.cmd")
     set(PACKMAN_PLATFORM "windows-x86_64")
+    set(PM_PACKAGES_ROOT_DIR "${CMAKE_SOURCE_DIR}/packman-repo")
 elseif(FALCOR_LINUX)
     set(PACKMAN "${CMAKE_SOURCE_DIR}/tools/packman/packman")
     set(PACKMAN_PLATFORM "linux-x86_64")
@@ -90,8 +91,9 @@ endif()
 
 # Pull dependencies at configure time.
 message(STATUS "Updating packman dependencies ...")
+set(ENV{PM_PACKAGES_ROOT} ${PM_PACKAGES_ROOT_DIR})
 execute_process(
-    COMMAND ${PACKMAN} pull ${CMAKE_SOURCE_DIR}/dependencies.xml --platform ${PACKMAN_PLATFORM}
+    COMMAND  ${PACKMAN} pull ${CMAKE_SOURCE_DIR}/dependencies.xml --platform ${PACKMAN_PLATFORM}
     COMMAND_ERROR_IS_FATAL ANY
 )
 
@@ -223,7 +225,7 @@ add_custom_target(packman_dependencies DEPENDS packman_dependencies_stamp)
 set_target_properties(packman_dependencies PROPERTIES FOLDER "Misc")
 add_custom_command(
     OUTPUT packman_dependencies_stamp
-    COMMAND ${PACKMAN} pull ${CMAKE_SOURCE_DIR}/dependencies.xml --platform ${PACKMAN_PLATFORM}
+    COMMAND ${CMAKE_COMMAND} -E env PM_PACKAGES_ROOT=${PM_PACKAGES_ROOT_DIR} ${PACKMAN} pull ${CMAKE_SOURCE_DIR}/dependencies.xml --platform ${PACKMAN_PLATFORM}
     COMMAND ${CMAKE_COMMAND} -E touch packman_dependencies_stamp
     MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/dependencies.xml
     COMMENT "Updating packman dependencies"
