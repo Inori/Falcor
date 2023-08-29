@@ -47,4 +47,9 @@ public:
     void onHotReload(HotReloadFlags reloaded) override;
 
 private:
+    void loadScene(const std::filesystem::path& path, const Fbo* pTargetFbo);
+
+private:
+    ref<Scene> mpScene = nullptr;
+    ref<Camera> mpCamera = nullptr;
 };
