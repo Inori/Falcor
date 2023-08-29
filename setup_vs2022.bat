@@ -4,6 +4,7 @@
 setlocal
 
 set PRESET_SUFFIX=""
+set PM_PACKAGES_ROOT=%~dp0packman-repo
 
 if "%~1"=="ci" (
     set PRESET_SUFFIX="-ci"

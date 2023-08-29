@@ -11,6 +11,7 @@
 # Packman folders.
 /external/packman/
 /tools/.packman/
+/packman-repo/
 
 # IDE folders.
 /.vs/
