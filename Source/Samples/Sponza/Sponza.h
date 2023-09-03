@@ -28,6 +28,7 @@
 #pragma once
 #include "Falcor.h"
 #include "Core/SampleApp.h"
+#include "Core/Pass/RasterPass.h"
 
 using namespace Falcor;
 
@@ -48,8 +49,10 @@ public:
 
 private:
     void loadScene(const std::filesystem::path& path, const Fbo* pTargetFbo);
+    void renderRaster(RenderContext* pRenderContext, const ref<Fbo>& pTargetFbo);
 
 private:
     ref<Scene> mpScene = nullptr;
     ref<Camera> mpCamera = nullptr;
+    ref<RasterPass> mpRasterPass = nullptr;
 };

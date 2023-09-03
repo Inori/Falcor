@@ -37,6 +37,7 @@ uint32_t mSampleGuiPositionX = 20;
 uint32_t mSampleGuiPositionY = 40;
 
 static const std::string kDefaultScene = "Sponza/NewSponza_Main_glTF_002.gltf";
+static const std::string kSceneSettingFile = "sponza_settings.json";
 
 Sponza::Sponza(const SampleAppConfig& config) : SampleApp(config)
 {
@@ -72,15 +73,21 @@ void Sponza::onResize(uint32_t width, uint32_t height)
 
 void Sponza::onFrameRender(RenderContext* pRenderContext, const ref<Fbo>& pTargetFbo)
 {
-    const float4 clearColor(0.38f, 0.52f, 0.10f, 1);
+    FALCOR_ASSERT(mpScene);
+
+    const float4 clearColor(0.0f, 0.64f, 0.95f, 1.0f);
     pRenderContext->clearFbo(pTargetFbo.get(), clearColor, 1.0f, 0, FboAttachmentType::All);
+
+    mpScene->update(pRenderContext, getGlobalClock().getTime());
+
+    renderRaster(pRenderContext, pTargetFbo);
 }
 
 void Sponza::onGuiRender(Gui* pGui)
 {
     Gui::Window w(pGui, "Falcor", {250, 200});
     renderGlobalUI(pGui);
-    w.text("Hello from Sponza");
+    w.text("Hello Sponza");
     if (w.button("Click Here"))
     {
         msgBox("Info", "Now why would you do that?");
@@ -89,12 +96,12 @@ void Sponza::onGuiRender(Gui* pGui)
 
 bool Sponza::onKeyEvent(const KeyboardEvent& keyEvent)
 {
-    return false;
+    return mpScene && mpScene->onKeyEvent(keyEvent);
 }
 
 bool Sponza::onMouseEvent(const MouseEvent& mouseEvent)
 {
-    return false;
+    return mpScene && mpScene->onMouseEvent(mouseEvent);
 }
 
 void Sponza::onHotReload(HotReloadFlags reloaded)
@@ -104,8 +111,38 @@ void Sponza::onHotReload(HotReloadFlags reloaded)
 
 void Sponza::loadScene(const std::filesystem::path& path, const Fbo* pTargetFbo)
 {
-    mpScene = Scene::create(getDevice(), path);
+    Settings settings;
+    settings.addOptions(getRuntimeDirectory() / kSceneSettingFile);
+    mpScene = Scene::create(getDevice(), path, settings);
+
+    // setup camera
     mpCamera = mpScene->getCamera();
+    float radius = mpScene->getSceneBounds().radius();
+    mpScene->setCameraSpeed(radius * 0.5f);
+    float nearZ = std::max(0.1f, radius / 750.0f);
+    float farZ = radius * 10;
+    mpCamera->setDepthRange(nearZ, farZ);
+    mpCamera->setAspectRatio((float)pTargetFbo->getWidth() / (float)pTargetFbo->getHeight());
+
+    // setup raster pass
+    auto shaderModules = mpScene->getShaderModules();
+    auto typeConformances = mpScene->getTypeConformances();
+    auto defines = mpScene->getSceneDefines();
+
+    Program::Desc rasterProgDesc;
+    rasterProgDesc.addShaderModules(shaderModules);
+    rasterProgDesc.addTypeConformances(typeConformances);
+    rasterProgDesc.addShaderLibrary("Samples/Sponza/Sponza.slang").vsEntry("vsMain").psEntry("psMain");
+
+    mpRasterPass = RasterPass::create(getDevice(), rasterProgDesc, defines);
+}
+
+void Sponza::renderRaster(RenderContext* pRenderContext, const ref<Fbo>& pTargetFbo)
+{
+    FALCOR_PROFILE(pRenderContext, "renderRaster");
+
+    mpRasterPass->getState()->setFbo(pTargetFbo);
+    mpScene->rasterize(pRenderContext, mpRasterPass->getState().get(), mpRasterPass->getVars().get());
 }
 
 int main(int argc, char** argv)

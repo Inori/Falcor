@@ -219,12 +219,15 @@ namespace Falcor
             throw ImporterError(path, "Can't find scene file '{}'.", path);
         }
 
+        auto useCacheSetted = mSettings.getOption<bool>("useCache");
+        auto rebuildCacheSetted = mSettings.getOption<bool>("rebuildCache");
+        
         // Compute scene cache key based on absolute scene path and build flags.
         mSceneCacheKey = computeSceneCacheKey(fullPath, flags);
 
         // Determine if scene cache should be written after import.
-        bool useCache = is_set(flags, Flags::UseCache);
-        bool rebuildCache = is_set(flags, Flags::RebuildCache);
+        bool useCache = is_set(flags, Flags::UseCache) || useCacheSetted.value_or(false);
+        bool rebuildCache = is_set(flags, Flags::RebuildCache) || rebuildCacheSetted.value_or(false);
         mWriteSceneCache = useCache || rebuildCache;
 
         // Try to load scene cache if supported, available and requested.
