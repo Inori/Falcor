@@ -157,6 +157,9 @@ struct StandardMaterialInstance : IMaterialInstance
     */
     bool sampleReference<S : ISampleGenerator>(const ShadingData sd, const float3 wi, out float3 wo, out float pdf, out float3 weight, out uint lobeType, inout S sg)
     {
+        weight = float3(0.0);
+        lobeType = (uint)LobeType::None;
+
         const bool isTransmissive = (getLobeTypes(sd) & (uint)LobeType::Transmission) != 0;
 
         wo = sample_cosine_hemisphere_concentric(sampleNext2D(sg), pdf); // pdf = cos(theta) / pi
