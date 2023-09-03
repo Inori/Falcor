@@ -33,6 +33,31 @@ float4 psMain(VSOut vsOut, uint triangleIndex: SV_PrimitiveID) : SV_TARGET
     SamplerState sampler = ms.getDefaultTextureSampler(vsOut.materialID);
     BasicMaterialData bmd = ms.getBasicMaterialData(vsOut.materialID);
 
-    float4 diffuse = ms.sampleTexture(bmd.texBaseColor, sampler, vsOut.texC, float4(0.0), lod);
-    return float4(diffuse.xyz, 1.0);
+    float4 baseColor = ms.sampleTexture(bmd.texBaseColor, sampler, vsOut.texC, float4(0.0), lod);
+    float4 normalMap = ms.sampleTexture(bmd.texNormalMap, sampler, vsOut.texC, float4(0.0), lod);
+    float4 specular = ms.sampleTexture(bmd.texSpecular, sampler, vsOut.texC, float4(0.0), lod);
+
+    float3 albedo = baseColor.rgb;
+    float3 nomalT = normalMap.xyz;
+    float3 normalW = vsOut.normalW;
+    float opacity = baseColor.a;
+    float roughness = specular.g;
+    float metallic = specular.b;
+
+    float3 lightDir = normalize(float3(1.0, 1.0, 1.0));
+    float3 lightColor = float3(0.5, 0.5, 0.7);
+
+    float3 ambient = albedo * 0.05;
+
+    float3 diffuse = saturate(dot(normalW, lightDir)) * albedo;
+
+    float3 viewDir = normalize(gScene.camera.getPosition() - vsOut.posW);
+    float3 H = normalize(viewDir + lightDir);
+
+    float cosTheta = pow(saturate(dot(normalW, H)), 20.0);
+    float3 spec = lightColor * cosTheta;
+
+    float3 color = ambient + diffuse + spec;
+
+    return float4(color, 1.0);
 }
