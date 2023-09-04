@@ -275,6 +275,51 @@ namespace Falcor
         }
     }
 
+    void SceneBuilder::importList(const std::vector<std::filesystem::path>& pathList)
+    {
+        std::string keyPath = {};
+        for (const auto& path : pathList)
+        {
+            keyPath += path.string();
+        }
+
+        auto useCacheSetted = mSettings.getOption<bool>("useCache");
+        auto rebuildCacheSetted = mSettings.getOption<bool>("rebuildCache");
+
+        // Compute scene cache key based on absolute scene path and build flags.
+        mSceneCacheKey = computeSceneCacheKey(keyPath, mFlags);
+
+        // Determine if scene cache should be written after import.
+        bool useCache = is_set(mFlags, Flags::UseCache) || useCacheSetted.value_or(false);
+        bool rebuildCache = is_set(mFlags, Flags::RebuildCache) || rebuildCacheSetted.value_or(false);
+        mWriteSceneCache = useCache || rebuildCache;
+
+        // Try to load scene cache if supported, available and requested.
+        if (useCache && !rebuildCache && SceneCache::hasValidCache(mSceneCacheKey))
+        {
+            try
+            {
+                mpScene = Scene::create(mpDevice, SceneCache::readCache(mpDevice, mSceneCacheKey));
+                return;
+            }
+            catch (const std::exception& e)
+            {
+                throw ImporterError(keyPath, "Failed to load scene cache: {}", e.what());
+            }
+        }
+
+        for (const auto& path : pathList)
+        {
+            std::filesystem::path fullPath;
+            if (!findFileInDataDirectories(path, fullPath))
+            {
+                throw ImporterError(path, "Can't find scene file '{}'.", path);
+            }
+
+            import(path);
+        }
+    }
+
     void SceneBuilder::importFromMemory(const void* buffer, size_t byteSize, std::string_view extension, const pybind11::dict& dict)
     {
         logInfo("Importing scene from memory");

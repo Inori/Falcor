@@ -346,6 +346,12 @@ namespace Falcor
         */
         void import(const std::filesystem::path& path, const pybind11::dict& dict = pybind11::dict());
 
+        /** Import a list of scene/model files
+            \param pathList The list of files to load
+            Throws an ImporterError if something went wrong.
+        */
+        void importList(const std::vector<std::filesystem::path>& pathList);
+
         /** Import a scene/model file from memory.
             \param[in] buffer Memory buffer.
             \param[in] byteSize Size in bytes of memory buffer.

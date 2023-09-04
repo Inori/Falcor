@@ -254,6 +254,13 @@ namespace Falcor
         return ref<Scene>(new Scene(pDevice, std::move(sceneData)));
     }
 
+    ref<Scene> Scene::create(ref<Device> pDevice, const std::vector<std::filesystem::path>& pathList, const Settings& settings /*= Settings()*/)
+    {
+        SceneBuilder builder(pDevice, settings);
+        builder.importList(pathList);
+        return builder.getScene();
+    }
+
     void Scene::updateSceneDefines()
     {
         DefineList defines;

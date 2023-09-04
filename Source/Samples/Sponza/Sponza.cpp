@@ -36,7 +36,8 @@ uint32_t mSampleGuiHeight = 200;
 uint32_t mSampleGuiPositionX = 20;
 uint32_t mSampleGuiPositionY = 40;
 
-static const std::string kDefaultScene = "Sponza/NewSponza_Main_glTF_002.gltf";
+static const std::string kSceneSponzaMain = "Sponza/NewSponza_Main_glTF_002.gltf";
+static const std::string kSceneSponzaCurtains = "Sponza/NewSponza_Curtains_glTF.gltf";
 static const std::string kSceneSettingFile = "sponza_settings.json";
 
 Sponza::Sponza(const SampleAppConfig& config) : SampleApp(config)
@@ -52,13 +53,8 @@ Sponza::~Sponza()
 void Sponza::onLoad(RenderContext* pRenderContext)
 {
     //
-    fs::path modelFullPath;
-    if (!findFileInDataDirectories(kDefaultScene, modelFullPath))
-    {
-        throw RuntimeError("Can not find model file!");
-    }
-
-    loadScene(modelFullPath, getTargetFbo().get());
+    createScene();
+    setupScene();
 }
 
 void Sponza::onShutdown()
@@ -109,11 +105,18 @@ void Sponza::onHotReload(HotReloadFlags reloaded)
     //
 }
 
-void Sponza::loadScene(const std::filesystem::path& path, const Fbo* pTargetFbo)
+void Sponza::createScene()
 {
     Settings settings;
     settings.addOptions(getRuntimeDirectory() / kSceneSettingFile);
-    mpScene = Scene::create(getDevice(), path, settings);
+
+    std::vector<std::filesystem::path> sceneFiles = {kSceneSponzaMain, kSceneSponzaCurtains};
+    mpScene = Scene::create(getDevice(), sceneFiles, settings);
+}
+
+void Sponza::setupScene()
+{
+    Fbo* pTargetFbo = getTargetFbo().get();
 
     // setup camera
     mpCamera = mpScene->getCamera();

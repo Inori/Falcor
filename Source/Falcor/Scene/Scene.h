@@ -457,6 +457,14 @@ namespace Falcor
         */
         static ref<Scene> create(ref<Device> pDevice, const std::filesystem::path& path, const Settings& settings = Settings());
 
+        /** Create scene from file.
+            \param[in] pDevice GPU device.
+            \param[in] pathList Import the scene from the list of paths.
+            \param[in] settings Optional settings.
+            \return Scene object, or throws an ImporterError if import went wrong.
+        */
+        static ref<Scene> create(ref<Device> pDevice, const std::vector<std::filesystem::path>& pathList, const Settings& settings = Settings());
+
         /** Create scene from in-memory representation.
             \param[in] pDevice GPU device.
             \param[in] sceneData All scene data.

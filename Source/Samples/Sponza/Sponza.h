@@ -48,7 +48,8 @@ public:
     void onHotReload(HotReloadFlags reloaded) override;
 
 private:
-    void loadScene(const std::filesystem::path& path, const Fbo* pTargetFbo);
+    void createScene();
+    void setupScene();
     void renderRaster(RenderContext* pRenderContext, const ref<Fbo>& pTargetFbo);
 
 private:
