@@ -81,12 +81,22 @@ void Sponza::onFrameRender(RenderContext* pRenderContext, const ref<Fbo>& pTarge
 
 void Sponza::onGuiRender(Gui* pGui)
 {
-    Gui::Window w(pGui, "Falcor", {250, 200});
+    Gui::Window w(pGui, "Falcor", {300, 220});
     renderGlobalUI(pGui);
-    w.text("Hello Sponza");
-    if (w.button("Click Here"))
+    auto fps = getFrameRate().getMsg(isVsyncEnabled());
+    w.text(fps);
+    w.separator();
+    //w.text("Hello Sponza");
+    //if (w.button("Click Here"))
+    //{
+    //    msgBox("Info", "Now why would you do that?");
+    //}
+
+    auto lights = mpScene->getLights();
+    for (auto& light : lights)
     {
-        msgBox("Info", "Now why would you do that?");
+        w.text(light->getName());
+        light->renderUI(w);
     }
 }
 
@@ -116,6 +126,8 @@ void Sponza::createScene()
 
 void Sponza::setupScene()
 {
+    FALCOR_ASSERT(mpScene);
+
     Fbo* pTargetFbo = getTargetFbo().get();
 
     // setup camera

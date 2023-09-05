@@ -44,8 +44,13 @@ float4 psMain(VSOut vsOut, uint triangleIndex: SV_PrimitiveID) : SV_TARGET
     float roughness = specular.g;
     float metallic = specular.b;
 
-    float3 lightDir = normalize(float3(1.0, 1.0, 1.0));
-    float3 lightColor = float3(0.5, 0.5, 0.7);
+    // LightData light = gScene.getLight(0); // The sky
+    // float3 lightPos = light.posW;
+    // float3 lightDir = normalize(lightPos - gScene.camera.getPosition());
+    // float3 lightColor = light.intensity;
+    LightData light = gScene.getLight(1); // The sun
+    float3 lightDir = normalize(light.dirW);
+    float3 lightColor = light.intensity;
 
     float3 ambient = albedo * 0.05;
 
