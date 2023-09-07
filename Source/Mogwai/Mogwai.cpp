@@ -459,10 +459,20 @@ namespace Mogwai
             if (getProgressBar().isActive()) getProgressBar().show("Loading Configuration");
 
             // Add script directory to search paths (add it to the front to make it highest priority).
-            auto directory = std::filesystem::absolute(path).parent_path();
+            std::filesystem::path directory;
+            std::filesystem::path fullPath;
+            if (findFileInDataDirectories(path, fullPath))
+            {
+                directory = fullPath.parent_path();
+            }
+            else
+            {
+                fullPath = std::filesystem::absolute(path);
+                directory = fullPath.parent_path();
+            }
             addDataDirectory(directory, true);
 
-            Scripting::runScriptFromFile(path);
+            Scripting::runScriptFromFile(fullPath);
 
             removeDataDirectory(directory);
         }
