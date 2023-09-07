@@ -126,6 +126,22 @@ namespace Falcor
         {
             return determinant(float3x3(m)) < 0.f;
         }
+
+                // Helpers
+        SceneBuilder::Flags getBuilderFlags(const Settings& settings)
+        {
+            SceneBuilder::Flags flags = SceneBuilder::Flags::Default;
+
+            auto useCache = settings.getOption<bool>("useCache");
+            auto rebuildCache = settings.getOption<bool>("rebuildCache");
+
+            if (useCache.value_or(false))
+                flags |= SceneBuilder::Flags::UseCache;
+            if (rebuildCache.value_or(false))
+                flags |= SceneBuilder::Flags::RebuildCache;
+
+            return flags;
+        }
     }
 
     const FileDialogFilterVec& Scene::getFileExtensionFilters()
@@ -246,7 +262,8 @@ namespace Falcor
 
     ref<Scene> Scene::create(ref<Device> pDevice, const std::filesystem::path& path, const Settings& settings)
     {
-        return SceneBuilder(pDevice, path, settings).getScene();
+        auto flags = getBuilderFlags(settings);
+        return SceneBuilder(pDevice, path, settings, flags).getScene();
     }
 
     ref<Scene> Scene::create(ref<Device> pDevice, SceneData&& sceneData)
@@ -256,7 +273,8 @@ namespace Falcor
 
     ref<Scene> Scene::create(ref<Device> pDevice, const std::vector<std::filesystem::path>& pathList, const Settings& settings /*= Settings()*/)
     {
-        SceneBuilder builder(pDevice, settings);
+        auto flags = getBuilderFlags(settings);
+        SceneBuilder builder(pDevice, settings, flags);
         builder.importList(pathList);
         return builder.getScene();
     }

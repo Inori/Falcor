@@ -64,13 +64,13 @@
 
 namespace Falcor
 {
+    
     struct MouseEvent;
     struct KeyboardEvent;
     struct GamepadEvent;
     struct GamepadState;
 
     class RtProgramVars;
-
     /** This class is the main scene representation.
         It holds all scene resources such as geometry, cameras, lights, and materials.
 
