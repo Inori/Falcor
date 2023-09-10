@@ -37,9 +37,15 @@ namespace
     void regBlitPass(pybind11::module& m)
     {
         pybind11::class_<BlitPass, RenderPass, ref<BlitPass>> pass(m, "BlitPass");
-        pass.def_property("filter",
+        pass.def_property(
+            kFilter,
             [](const BlitPass& self) { return enumToString(self.getFilter()); },
             [](BlitPass& self, const std::string& value) {self.setFilter(stringToEnum<Sampler::Filter>(value)); }
+        );
+        pass.def_property(
+            kOutputFormat,
+            [](const BlitPass& self) { return enumToString(self.getOutputFormat()); },
+            [](BlitPass& self, const std::string& value) { self.setOutputFormat(stringToEnum<ResourceFormat>(value)); }
         );
     }
 }
@@ -89,7 +95,18 @@ void BlitPass::execute(RenderContext* pRenderContext, const RenderData& renderDa
 
     if (pSrcTex && pDstTex)
     {
-        pRenderContext->blit(pSrcTex->getSRV(), pDstTex->getRTV(), RenderContext::kMaxRect, RenderContext::kMaxRect, mFilter);
+        //pRenderContext->blit(pSrcTex->getSRV(), pDstTex->getRTV(), RenderContext::kMaxRect, RenderContext::kMaxRect, mFilter);
+
+        //// To view depth buffer, convert D32 to RGBA32
+        //const Sampler::ReductionMode componentsReduction[] = {
+        //    Sampler::ReductionMode::Standard, Sampler::ReductionMode::Standard, Sampler::ReductionMode::Standard,
+        //    Sampler::ReductionMode::Standard};
+        //const float4 componentsTransform[] = {
+        //    float4(1.0f, 0.0f, 0.0f, 0.0f), float4(1.0f, 0.0f, 0.0f, 0.0f), float4(1.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 1.0f)};
+        //pRenderContext->blit(
+        //    pSrcTex->getSRV(), pDstTex->getRTV(), RenderContext::kMaxRect, RenderContext::kMaxRect, mFilter, componentsReduction,
+        //    componentsTransform
+        //);
     }
     else
     {
@@ -100,4 +117,6 @@ void BlitPass::execute(RenderContext* pRenderContext, const RenderData& renderDa
 void BlitPass::renderUI(Gui::Widgets& widget)
 {
     if (auto filter = mFilter; widget.dropdown("Filter", filter)) setFilter(filter);
+    if (auto outFmt = mOutputFormat; widget.dropdown("OutputFormat", outFmt))
+        setOutputFormat(outFmt);
 }

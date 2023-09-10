@@ -31,34 +31,38 @@
 
 using namespace Falcor;
 
-/** Render pass that blits an input texture to an output texture.
-
-    This pass is useful for format conversion.
-*/
-class BlitPass : public RenderPass
+class GBufferPass : public RenderPass
 {
+    struct GraphicsPipeline
+    {
+        ref<GraphicsState> pState;
+        ref<GraphicsProgram> pProgram;
+        ref<GraphicsVars> pVars;
+    };
+
 public:
-    FALCOR_PLUGIN_CLASS(BlitPass, "BlitPass", "Blit a texture into a different texture.");
+    FALCOR_PLUGIN_CLASS(GBufferPass, "GBufferPass", "GBuffer pass and depth only pass.");
 
-    static ref<BlitPass> create(ref<Device> pDevice, const Properties& props) { return make_ref<BlitPass>(pDevice, props); }
+    static ref<GBufferPass> create(ref<Device> pDevice, const Properties& props) { return make_ref<GBufferPass>(pDevice, props); }
 
-    BlitPass(ref<Device> pDevice, const Properties& props);
+    GBufferPass(ref<Device> pDevice, const Properties& props);
 
     virtual Properties getProperties() const override;
     virtual RenderPassReflection reflect(const CompileData& compileData) override;
+    virtual void compile(RenderContext* pRenderContext, const CompileData& compileData) override;
     virtual void execute(RenderContext* pRenderContext, const RenderData& renderData) override;
     virtual void renderUI(Gui::Widgets& widget) override;
-
-    // Scripting functions
-    Sampler::Filter getFilter() const { return mFilter; }
-    void setFilter(Sampler::Filter filter) { mFilter = filter; }
-
-    ResourceFormat getOutputFormat() const { return mOutputFormat; }
-    void setOutputFormat(ResourceFormat fmt) { mOutputFormat = fmt; }
+    virtual void setScene(RenderContext* pRenderContext, const ref<Scene>& pScene) override;
+    virtual bool onMouseEvent(const MouseEvent& mouseEvent) override;
+    virtual bool onKeyEvent(const KeyboardEvent& keyEvent) override;
 
 private:
-    void parseProperties(const Properties& props);
+    void detachFboTargets();
 
-    Sampler::Filter mFilter = Sampler::Filter::Linear;
-    ResourceFormat mOutputFormat = ResourceFormat::Unknown;
+private:
+    ref<Scene> mpScene;
+    ref<Fbo> mpFbo;
+
+    GraphicsPipeline mDepthPipeline;
+    GraphicsPipeline mGBufferPipeline;
 };
