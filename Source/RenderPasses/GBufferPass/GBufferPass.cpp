@@ -42,9 +42,10 @@ namespace
    
     const ChannelList kGBufferChannels =
     {
-        {"posW",    "gPosW",    "position in world space",  true /* optional */, ResourceFormat::RGBA32Float},
-        {"normalW", "gNormalW", "normal in world space",    true /* optional */, ResourceFormat::RGBA32Float},
-        {"albedo",  "gAlbedo",  "albedo",                   true /* optional */, ResourceFormat::RGBA32Float},
+        {"posW",    "gPosW",           "Position in world space",  true /* optional */, ResourceFormat::RGBA32Float},
+        {"normalW", "gNormalW",        "Normal in world space",    true /* optional */, ResourceFormat::RGBA32Float},
+        {"texC",    "gTexC",           "Texture coordinate",       true /* optional */, ResourceFormat::RG32Float},
+        {"mtlData", "gMaterialData",   "Material information",     true /* optional */, ResourceFormat::RGBA32Uint},
     };
 
     const std::string kDepthName = "depth";
