@@ -1085,6 +1085,12 @@ namespace Falcor
         */
         void setRaytracingShaderData(RenderContext* pRenderContext, const ShaderVar& var, uint32_t rayTypeCount = 1);
 
+        /** Set the scene rasterize resources into a shader var.
+            \param[in] pRenderContext Render context.
+            \param[in] var Shader variable to set data into, usually the root var.
+        */
+        void setRasterizeShaderData(RenderContext* pRenderContext, const ShaderVar& var);
+
         /** Get the name of the mesh with the given ID.
         */
         std::string getMeshName(uint32_t meshID) const { FALCOR_ASSERT(meshID < mMeshNames.size());  return mMeshNames[meshID]; }
@@ -1206,6 +1212,10 @@ namespace Falcor
         /** Update an animatable object.
         */
         bool updateAnimatable(Animatable& animatable, const AnimationController& controller, bool force = false);
+
+        /** Bind Scene parameter block.
+         */
+        void bindSceneParameterBlock(const ShaderVar& var);
 
         UpdateFlags updateSelectedCamera(bool forceUpdate);
         UpdateFlags updateLights(bool forceUpdate);

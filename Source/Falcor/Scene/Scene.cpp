@@ -3747,6 +3747,14 @@ namespace Falcor
         updateRaytracingTLASStats();
     }
 
+    
+    void Scene::bindSceneParameterBlock(const ShaderVar& var)
+    {
+        getCamera()->setShaderData(mpSceneBlock->getRootVar()[kCamera]); // TODO REMOVE: Shouldn't be needed anymore?
+        var[kParameterBlockName] = mpSceneBlock;
+    }
+
+
     void Scene::setRaytracingShaderData(RenderContext* pRenderContext, const ShaderVar& var, uint32_t rayTypeCount)
     {
         // On first execution or if BLASes need to be rebuilt, create BLASes for all geometries.
@@ -3777,8 +3785,12 @@ namespace Falcor
         mpSceneBlock->getRootVar()["rtAccel"].setAccelerationStructure(tlasIt->second.pTlasObject);
 
         // Bind Scene parameter block.
-        getCamera()->setShaderData(mpSceneBlock->getRootVar()[kCamera]); // TODO REMOVE: Shouldn't be needed anymore?
-        var[kParameterBlockName] = mpSceneBlock;
+        bindSceneParameterBlock(var);
+    }
+
+    void Scene::setRasterizeShaderData(RenderContext* pRenderContext, const ShaderVar& var)
+    {
+        bindSceneParameterBlock(var);
     }
 
     std::vector<uint32_t> Scene::getMeshBlasIDs() const
