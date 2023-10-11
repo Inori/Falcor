@@ -48,7 +48,7 @@ float4 psMain(VSOut vsOut, uint triangleIndex: SV_PrimitiveID) : SV_TARGET
     // float3 lightPos = light.posW;
     // float3 lightDir = normalize(lightPos - gScene.camera.getPosition());
     // float3 lightColor = light.intensity;
-    LightData light = gScene.getLight(1); // The sun
+    LightData light = gScene.getLight(0); // The sun
     float3 lightDir = normalize(light.dirW);
     float3 lightColor = light.intensity;
 
